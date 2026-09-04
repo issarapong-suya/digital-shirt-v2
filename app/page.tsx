@@ -568,13 +568,13 @@ export default function Round2OrderForm() {
 
             {/* PromptPay Info Header */}
             <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 border border-blue-500/30 rounded-2xl p-4 space-y-1">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold mb-1">
                 <QrIcon className="w-3.5 h-3.5" /> PromptPay / พร้อมเพย์
               </span>
-              <p className="text-xs text-slate-400 mt-1">เบอร์บัญชีพร้อมเพย์</p>
-              <p className="text-xl font-black text-white font-mono tracking-wider">098-146-9553</p>
+              <p className="text-xs text-slate-400">ชื่อบัญชี: <strong className="text-slate-100 text-sm">น.ส.เอธยา ติ๊บประสอน</strong></p>
+              <p className="text-xs text-slate-400">เบอร์พร้อมเพย์: <span className="font-mono text-white font-bold text-base">098-146-9553</span></p>
               <div className="border-t border-slate-800 pt-2 mt-2">
-                <p className="text-xs text-amber-300 font-medium">ยอดเงินระบุใน QR Code สุจริต</p>
+                <p className="text-xs text-amber-300 font-medium">ยอดเงินระบุใน QR Code อัตโนมัติ</p>
                 <p className="text-2xl font-black text-amber-400">
                   {currentTotal > 0 ? `${currentTotal.toLocaleString()} บาท` : 'กรุณาเลือกไซส์และจำนวน'}
                 </p>
