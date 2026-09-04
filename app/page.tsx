@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
+import generatePayload from 'promptpay-qr';
+import QRCode from 'qrcode';
 import { 
   Sparkles, 
   CreditCard, 
@@ -17,7 +19,8 @@ import {
   ZoomIn,
   X,
   BarChart3,
-  Download
+  Download,
+  QrCode as QrIcon
 } from 'lucide-react';
 
 const AGENCIES = [
@@ -68,6 +71,7 @@ export default function Round2OrderForm() {
   const [loadingText, setLoadingText] = useState('');
   const [cidFound, setCidFound] = useState(false);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Auto-fill lookup by CID
@@ -88,6 +92,43 @@ export default function Round2OrderForm() {
       setSize('');
     }
   }, [cut, size]);
+
+  const calculateTotal = () => {
+    if (!size) return 0;
+    let basePrice = 350;
+    if (['2XL', '3XL', '4XL'].includes(size)) {
+      basePrice = 360;
+    } else if (size === '5XL' || size === 'พิเศษ') {
+      basePrice = 370;
+    }
+    return basePrice * qty;
+  };
+
+  // Generate Dynamic PromptPay QR Code Payload
+  useEffect(() => {
+    const totalAmount = calculateTotal();
+    const promptPayAccount = '0981469553';
+    try {
+      const payload = totalAmount > 0 
+        ? generatePayload(promptPayAccount, { amount: totalAmount }) 
+        : generatePayload(promptPayAccount, {});
+
+      QRCode.toDataURL(payload, {
+        width: 600,
+        margin: 2,
+        color: {
+          dark: '#0f172a',
+          light: '#ffffff'
+        }
+      }).then(url => {
+        setQrDataUrl(url);
+      }).catch(err => {
+        console.error('QR code generation error:', err);
+      });
+    } catch (err) {
+      console.error('PromptPay payload error:', err);
+    }
+  }, [size, qty, customChest]);
 
   const checkCid = async (cidVal: string) => {
     setIsLoading(true);
@@ -134,17 +175,6 @@ export default function Round2OrderForm() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const calculateTotal = () => {
-    if (!size) return 0;
-    let basePrice = 350;
-    if (['2XL', '3XL', '4XL'].includes(size)) {
-      basePrice = 360;
-    } else if (size === '5XL' || size === 'พิเศษ') {
-      basePrice = 370;
-    }
-    return basePrice * qty;
   };
 
   const handleSlipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -226,6 +256,7 @@ export default function Round2OrderForm() {
   };
 
   const availableSizes = cut === 'ชาย' ? MEN_SIZES : WOMEN_SIZES;
+  const currentTotal = calculateTotal();
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-3 sm:p-6 font-sans">
@@ -482,14 +513,14 @@ export default function Round2OrderForm() {
             <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 sm:p-5 flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-400">ยอดรวมชำระสุทธิ</p>
-                <p className="text-2xl sm:text-3xl font-black text-amber-400">{calculateTotal().toLocaleString()} <span className="text-sm font-normal text-slate-300">บาท</span></p>
+                <p className="text-2xl sm:text-3xl font-black text-amber-400">{currentTotal.toLocaleString()} <span className="text-sm font-normal text-slate-300">บาท</span></p>
               </div>
               <button
                 type="button"
-                onClick={() => setZoomImage('/img/QR_PAY.jpg')}
-                className="px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold hover:bg-amber-500/20 transition flex items-center gap-1.5"
+                onClick={() => setZoomImage('PROMPTPAY_QR')}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-amber-500/20"
               >
-                <ZoomIn className="w-4 h-4" /> ดู QR ชำระเงิน
+                <QrIcon className="w-4 h-4" /> สแกน QR ชำระเงิน
               </button>
             </div>
 
@@ -523,10 +554,10 @@ export default function Round2OrderForm() {
         </form>
       </div>
 
-      {/* Zoom / Payment QR Image Modal */}
-      {zoomImage && (
+      {/* Dynamic PromptPay QR Code Modal */}
+      {zoomImage === 'PROMPTPAY_QR' && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[120] flex items-center justify-center p-4 animate-fadeIn">
-          <div className="relative max-w-md w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden p-5 shadow-2xl space-y-4">
+          <div className="relative max-w-md w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden p-5 shadow-2xl space-y-4 text-center">
             
             <button
               onClick={() => setZoomImage(null)}
@@ -535,44 +566,74 @@ export default function Round2OrderForm() {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Dynamic Total Price Header for QR Code Modal */}
-            {zoomImage === '/img/QR_PAY.jpg' && (
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 text-center">
-                <p className="text-xs text-amber-300 font-medium">ยอดเงินที่ต้องสแกนชำระสุทธิ</p>
+            {/* PromptPay Info Header */}
+            <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 border border-blue-500/30 rounded-2xl p-4 space-y-1">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold">
+                <QrIcon className="w-3.5 h-3.5" /> PromptPay / พร้อมเพย์
+              </span>
+              <p className="text-xs text-slate-400 mt-1">เบอร์บัญชีพร้อมเพย์</p>
+              <p className="text-xl font-black text-white font-mono tracking-wider">098-146-9553</p>
+              <div className="border-t border-slate-800 pt-2 mt-2">
+                <p className="text-xs text-amber-300 font-medium">ยอดเงินระบุใน QR Code สุจริต</p>
                 <p className="text-2xl font-black text-amber-400">
-                  {calculateTotal() > 0 ? `${calculateTotal().toLocaleString()} บาท` : 'ระบุเลือกไซส์และจำนวนก่อนชำระเงิน'}
+                  {currentTotal > 0 ? `${currentTotal.toLocaleString()} บาท` : 'กรุณาเลือกไซส์และจำนวน'}
                 </p>
-                {size && <p className="text-[11px] text-slate-400 mt-0.5">({size} - {qty} ตัว)</p>}
+                {size && <p className="text-[11px] text-slate-400 mt-0.5">({cut} ไซส์ {size} × {qty} ตัว)</p>}
               </div>
-            )}
-
-            {/* Image Container with Long Press Support */}
-            <div className="relative bg-slate-950 rounded-2xl overflow-hidden p-2 border border-slate-800">
-              <Image 
-                src={zoomImage} 
-                alt="Zoom" 
-                width={600} 
-                height={600} 
-                className="w-full h-auto rounded-xl object-contain max-h-[60vh] select-auto touch-auto cursor-pointer" 
-              />
             </div>
 
-            {/* Download & Mobile Instructions for QR */}
-            {zoomImage === '/img/QR_PAY.jpg' && (
-              <div className="space-y-2 text-center">
-                <a
-                  href="/img/QR_PAY.jpg"
-                  download="QR_Payment_Lampang_Shirt.jpg"
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 text-xs font-semibold flex items-center justify-center gap-2 transition"
-                >
-                  <Download className="w-4 h-4" /> ดาวน์โหลดรูป QR Code
-                </a>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  💡 <span className="text-slate-300 font-semibold">บนมือถือ:</span> สามารถแตะที่รูป QR Code ค้างไว้ เพื่อกด <span className="text-amber-300 font-semibold">&quot;บันทึกรูปภาพ&quot;</span> ลงอัลบั้มมือถือสำหรับการโอนเงินได้อย่างสะดวก
-                </p>
-              </div>
-            )}
+            {/* Dynamic Generated QR Image Container */}
+            <div className="relative bg-white rounded-2xl overflow-hidden p-4 shadow-inner border-2 border-slate-700 flex flex-col items-center justify-center">
+              {qrDataUrl ? (
+                // Standard <img> tag to allow long-press context menu on iOS/Android
+                // eslint-disable-next-line @next/next/no-img-element
+                <img 
+                  src={qrDataUrl} 
+                  alt="Dynamic PromptPay QR Code" 
+                  className="w-full max-w-[280px] h-auto rounded-lg select-all touch-auto cursor-pointer"
+                />
+              ) : (
+                <div className="py-12 text-slate-500 flex flex-col items-center gap-2">
+                  <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                  <span className="text-xs">กำลังสร้าง QR Code...</span>
+                </div>
+              )}
+            </div>
 
+            {/* Mobile Instructions & Save Button */}
+            <div className="space-y-2">
+              {qrDataUrl && (
+                <a
+                  href={qrDataUrl}
+                  download={`PromptPay_0981469553_${currentTotal}THB.png`}
+                  className="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-amber-500/20"
+                >
+                  <Download className="w-4 h-4" /> บันทึกรูป QR Code ลงเครื่อง ({currentTotal} บาท)
+                </a>
+              )}
+              
+              <div className="bg-slate-950/80 rounded-xl p-3 border border-slate-800 text-[11px] text-slate-300 leading-relaxed text-left space-y-1">
+                <p>💡 <strong className="text-amber-400">คำแนะนำบนมือถือ:</strong></p>
+                <p>• สามารถกดปุ่ม <strong className="text-white">&quot;บันทึกรูป QR Code&quot;</strong> หรือแตะที่รูป QR ค้างไว้แล้วกด <strong className="text-white">&quot;บันทึกรูปภาพ&quot;</strong> เพื่อเก็บเข้าอัลบั้มภาพมือถือได้ทันที</p>
+                <p>• เมื่อสแกนผ่านแอปธนาคาร ยอดเงินจะถูกระบุเป็น <strong className="text-amber-400">{currentTotal} บาท</strong> โดยอัตโนมัติ ไม่ต้องพิมพ์ยอดเอง</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* General Image Zoom Modal (for Shirts & Size Chart) */}
+      {zoomImage && zoomImage !== 'PROMPTPAY_QR' && (
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[120] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="relative max-w-xl w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden p-2">
+            <button
+              onClick={() => setZoomImage(null)}
+              className="absolute top-4 right-4 bg-slate-800 text-slate-200 p-2 rounded-full hover:bg-slate-700 transition z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <Image src={zoomImage} alt="Zoom" width={600} height={600} className="w-full h-auto rounded-2xl object-contain max-h-[80vh]" />
           </div>
         </div>
       )}
@@ -591,7 +652,7 @@ export default function Round2OrderForm() {
               <p><strong>ผู้สั่ง:</strong> {firstName} {lastName}</p>
               <p><strong>ไซส์:</strong> {size === 'พิเศษ' ? `พิเศษ (รอบอก ${customChest}")` : size} ({cut})</p>
               <p><strong>จำนวน:</strong> {qty} ตัว</p>
-              <p><strong>ยอดรวม:</strong> <span className="text-amber-400 font-bold">{calculateTotal()} บาท</span></p>
+              <p><strong>ยอดรวม:</strong> <span className="text-amber-400 font-bold">{currentTotal} บาท</span></p>
             </div>
 
             <button
