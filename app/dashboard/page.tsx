@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { 
   Users, 
   Shirt, 
@@ -13,7 +14,8 @@ import {
   Building2, 
   Sparkles,
   X,
-  Filter
+  Filter,
+  ArrowLeft
 } from 'lucide-react';
 
 interface OrderItem {
@@ -115,7 +117,14 @@ export default function Round2Dashboard() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/"
+            className="px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-amber-400 text-slate-200 text-xs sm:text-sm font-semibold transition flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4 text-amber-400" /> กลับหน้าสั่งจองเสื้อ
+          </Link>
+
           <button
             onClick={fetchOrders}
             className="px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-amber-400 text-slate-200 text-xs sm:text-sm font-semibold transition flex items-center gap-2"
@@ -189,7 +198,7 @@ export default function Round2Dashboard() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ค้นหาตาม ชื่อ, CID หรือหน่วยงาน..."
-              className="w-full bg-slate-950 border border-slate-800 focus:border-amber-400 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none"
+              className="w-full bg-slate-950 border border-slate-800 focus:border-amber-400 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none font-sans"
             />
           </div>
 
@@ -201,7 +210,7 @@ export default function Round2Dashboard() {
             <select
               value={agencyFilter}
               onChange={(e) => setAgencyFilter(e.target.value)}
-              className="bg-slate-950 border border-slate-800 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+              className="bg-slate-950 border border-slate-800 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none font-sans"
             >
               <option value="">-- หน่วยงานทั้งหมด --</option>
               {agenciesList.map(a => (
@@ -212,7 +221,7 @@ export default function Round2Dashboard() {
             <select
               value={cutFilter}
               onChange={(e) => setCutFilter(e.target.value)}
-              className="bg-slate-950 border border-slate-800 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+              className="bg-slate-950 border border-slate-800 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none font-sans"
             >
               <option value="">-- ทรงทั้งหมด --</option>
               <option value="ชาย">ทรงชาย</option>

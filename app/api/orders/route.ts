@@ -30,10 +30,8 @@ export async function POST(request: NextRequest) {
     let basePrice = 350;
     if (['2XL', '3XL', '4XL'].includes(size)) {
       basePrice = 360;
-    } else if (size === '5XL') {
+    } else if (size === '5XL' || size === 'พิเศษ') {
       basePrice = 370;
-    } else if (size === 'พิเศษ') {
-      basePrice = 380;
     }
     const totalPrice = basePrice * qty;
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Swal from 'sweetalert2';
 import { 
   Sparkles, 
@@ -12,11 +13,11 @@ import {
   Ruler, 
   Shirt, 
   Building2, 
-  FileText,
-  AlertCircle,
   Loader2,
   ZoomIn,
-  X
+  X,
+  BarChart3,
+  Download
 } from 'lucide-react';
 
 const AGENCIES = [
@@ -140,10 +141,8 @@ export default function Round2OrderForm() {
     let basePrice = 350;
     if (['2XL', '3XL', '4XL'].includes(size)) {
       basePrice = 360;
-    } else if (size === '5XL') {
+    } else if (size === '5XL' || size === 'พิเศษ') {
       basePrice = 370;
-    } else if (size === 'พิเศษ') {
-      basePrice = 380;
     }
     return basePrice * qty;
   };
@@ -246,12 +245,21 @@ export default function Round2OrderForm() {
       {/* Main Container Card */}
       <div className="w-full max-w-3xl bg-slate-800/90 backdrop-blur-xl border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden relative">
         
-        {/* Header Header Pattern */}
+        {/* Header Pattern */}
         <div className="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-center border-b border-slate-700/80 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none" />
           
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-3">
-            <Sparkles className="w-3.5 h-3.5" /> สั่งจองเสื้อรอบที่ 2 (เปิดให้ระบุไซส์พิเศษ)
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" /> สั่งจองเสื้อรอบที่ 2
+            </div>
+
+            <Link 
+              href="/dashboard" 
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-amber-400 text-xs font-semibold transition"
+            >
+              <BarChart3 className="w-3.5 h-3.5 text-amber-400" /> ดู Dashboard สรุปยอด
+            </Link>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200">
@@ -285,7 +293,7 @@ export default function Round2OrderForm() {
                 value={cid}
                 onChange={(e) => setCid(e.target.value.replace(/\D/g, ''))}
                 placeholder="กรอกเลขบัตรประชาชน 13 หลักเพื่อค้นหาหรือลงทะเบียนใหม่"
-                className="w-full bg-slate-900/80 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-3 text-slate-100 text-sm font-mono tracking-wider focus:outline-none transition"
+                className="w-full bg-slate-900/80 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none transition placeholder:text-slate-500 font-sans"
               />
             </div>
 
@@ -300,7 +308,7 @@ export default function Round2OrderForm() {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="ชื่อจริง"
-                  className="w-full bg-slate-900/80 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-2.5 text-slate-100 text-sm focus:outline-none transition"
+                  className="w-full bg-slate-900/80 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-2.5 text-slate-100 text-sm focus:outline-none transition placeholder:text-slate-500 font-sans"
                 />
               </div>
 
@@ -314,7 +322,7 @@ export default function Round2OrderForm() {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="นามสกุล"
-                  className="w-full bg-slate-900/80 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-2.5 text-slate-100 text-sm focus:outline-none transition"
+                  className="w-full bg-slate-900/80 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-2.5 text-slate-100 text-sm focus:outline-none transition placeholder:text-slate-500 font-sans"
                 />
               </div>
             </div>
@@ -327,7 +335,7 @@ export default function Round2OrderForm() {
                 required
                 value={agency}
                 onChange={(e) => setAgency(e.target.value)}
-                className="w-full bg-slate-900/80 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none transition"
+                className="w-full bg-slate-900/80 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none transition font-sans"
               >
                 <option value="">-- เลือกหน่วยงาน --</option>
                 {AGENCIES.map((ag) => (
@@ -400,7 +408,7 @@ export default function Round2OrderForm() {
             <button
               type="button"
               onClick={() => setZoomImage('/img/Size.png')}
-              className="w-full py-2 px-3 rounded-xl bg-slate-900/60 border border-dashed border-slate-700 hover:border-amber-400 text-amber-400 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition"
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-900/60 border border-dashed border-slate-700 hover:border-amber-400 text-amber-400 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition"
             >
               <Ruler className="w-4 h-4" /> คลิกเพื่อดูตารางขนาดไซส์เสื้อ (Size Chart)
             </button>
@@ -446,7 +454,7 @@ export default function Round2OrderForm() {
                   placeholder="เช่น 52, 54, 56 (นิ้ว)"
                   className="w-full bg-slate-900 border border-amber-500/50 focus:border-amber-400 rounded-xl px-4 py-2.5 text-slate-100 text-sm focus:outline-none"
                 />
-                <p className="text-xs text-amber-400/80">* ไซส์พิเศษใหญ่กว่า 5XL คิดราคา 380 บาท/ตัว</p>
+                <p className="text-xs text-amber-400/80">* ไซส์พิเศษใหญ่กว่า 5XL คิดราคา 370 บาท/ตัว (เท่ากับไซส์ 5XL)</p>
               </div>
             )}
 
@@ -515,17 +523,56 @@ export default function Round2OrderForm() {
         </form>
       </div>
 
-      {/* Zoom Image Modal */}
+      {/* Zoom / Payment QR Image Modal */}
       {zoomImage && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[120] flex items-center justify-center p-4">
-          <div className="relative max-w-xl w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden p-2">
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[120] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="relative max-w-md w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden p-5 shadow-2xl space-y-4">
+            
             <button
               onClick={() => setZoomImage(null)}
               className="absolute top-4 right-4 bg-slate-800 text-slate-200 p-2 rounded-full hover:bg-slate-700 transition z-10"
             >
               <X className="w-5 h-5" />
             </button>
-            <Image src={zoomImage} alt="Zoom" width={600} height={600} className="w-full h-auto rounded-2xl object-contain max-h-[80vh]" />
+
+            {/* Dynamic Total Price Header for QR Code Modal */}
+            {zoomImage === '/img/QR_PAY.jpg' && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 text-center">
+                <p className="text-xs text-amber-300 font-medium">ยอดเงินที่ต้องสแกนชำระสุทธิ</p>
+                <p className="text-2xl font-black text-amber-400">
+                  {calculateTotal() > 0 ? `${calculateTotal().toLocaleString()} บาท` : 'ระบุเลือกไซส์และจำนวนก่อนชำระเงิน'}
+                </p>
+                {size && <p className="text-[11px] text-slate-400 mt-0.5">({size} - {qty} ตัว)</p>}
+              </div>
+            )}
+
+            {/* Image Container with Long Press Support */}
+            <div className="relative bg-slate-950 rounded-2xl overflow-hidden p-2 border border-slate-800">
+              <Image 
+                src={zoomImage} 
+                alt="Zoom" 
+                width={600} 
+                height={600} 
+                className="w-full h-auto rounded-xl object-contain max-h-[60vh] select-auto touch-auto cursor-pointer" 
+              />
+            </div>
+
+            {/* Download & Mobile Instructions for QR */}
+            {zoomImage === '/img/QR_PAY.jpg' && (
+              <div className="space-y-2 text-center">
+                <a
+                  href="/img/QR_PAY.jpg"
+                  download="QR_Payment_Lampang_Shirt.jpg"
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                >
+                  <Download className="w-4 h-4" /> ดาวน์โหลดรูป QR Code
+                </a>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  💡 <span className="text-slate-300 font-semibold">บนมือถือ:</span> สามารถแตะที่รูป QR Code ค้างไว้ เพื่อกด <span className="text-amber-300 font-semibold">&quot;บันทึกรูปภาพ&quot;</span> ลงอัลบั้มมือถือสำหรับการโอนเงินได้อย่างสะดวก
+                </p>
+              </div>
+            )}
+
           </div>
         </div>
       )}
