@@ -11,7 +11,6 @@ import {
   Search, 
   RefreshCw, 
   Eye, 
-  Building2, 
   Sparkles,
   X,
   Filter,
@@ -31,6 +30,9 @@ interface OrderItem {
   slipUrl: string;
   paymentStatus: string;
 }
+
+const MEN_SIZE_LIST = ['M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', 'พิเศษ'];
+const WOMEN_SIZE_LIST = ['S', 'M', 'L', 'XL', 'พิเศษ'];
 
 export default function Round2Dashboard() {
   const [orders, setOrders] = useState<OrderItem[]>([]);
@@ -74,13 +76,33 @@ export default function Round2Dashboard() {
   const totalOrdersCount = filteredOrders.length;
   const totalShirtsQty = filteredOrders.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
   const totalRevenue = filteredOrders.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
-  const specialSizesCount = filteredOrders.filter(item => item.size.includes('พิเศษ')).length;
 
+  // Size Breakdown Calculation
+  const menSizesQty: Record<string, number> = { 'M': 0, 'L': 0, 'XL': 0, '2XL': 0, '3XL': 0, '4XL': 0, '5XL': 0, 'พิเศษ': 0 };
+  const womenSizesQty: Record<string, number> = { 'S': 0, 'M': 0, 'L': 0, 'XL': 0, 'พิเศษ': 0 };
+  let totalMenQty = 0;
+  let totalWomenQty = 0;
+
+  filteredOrders.forEach(o => {
+    const qtyNum = Number(o.qty) || 1;
+    let szKey = o.size;
+    if (typeof szKey === 'string' && szKey.startsWith('พิเศษ')) {
+      szKey = 'พิเศษ';
+    }
+    if (o.cut === 'ชาย') {
+      totalMenQty += qtyNum;
+      menSizesQty[szKey] = (menSizesQty[szKey] || 0) + qtyNum;
+    } else {
+      totalWomenQty += qtyNum;
+      womenSizesQty[szKey] = (womenSizesQty[szKey] || 0) + qtyNum;
+    }
+  });
+
+  // Export CSV without CID for privacy
   const exportCSV = () => {
-    const headers = ['Timestamp', 'CID', 'ชื่อ', 'นามสกุล', 'หน่วยงาน', 'ทรง', 'ไซส์', 'จำนวน', 'ยอดรวม', 'สถานะ'];
+    const headers = ['Timestamp', 'ชื่อ', 'นามสกุล', 'หน่วยงาน', 'ทรง', 'ไซส์', 'จำนวน', 'ยอดรวม', 'สถานะ'];
     const rows = filteredOrders.map(o => [
       `"${o.timestamp}"`,
-      `"${o.cid}"`,
       `"${o.firstName}"`,
       `"${o.lastName}"`,
       `"${o.agency}"`,
@@ -143,8 +165,8 @@ export default function Round2Dashboard() {
 
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* Stats Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Top Summary Cards (3 Cards) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
@@ -163,6 +185,7 @@ export default function Round2Dashboard() {
             <div>
               <p className="text-xs text-slate-400 font-medium">จำนวนเสื้อรวม</p>
               <p className="text-2xl font-black text-slate-100">{totalShirtsQty} <span className="text-xs text-slate-400 font-normal">ตัว</span></p>
+              <p className="text-[11px] text-slate-400 font-medium mt-0.5">(ชาย {totalMenQty} / หญิง {totalWomenQty} ตัว)</p>
             </div>
           </div>
 
@@ -171,18 +194,63 @@ export default function Round2Dashboard() {
               <DollarSign className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs text-slate-400 font-medium"> ยอดเงินรวมสุทธิ</p>
+              <p className="text-xs text-slate-400 font-medium">ยอดเงินรวมสุทธิ</p>
               <p className="text-2xl font-black text-amber-400">{totalRevenue.toLocaleString()} <span className="text-xs text-slate-400 font-normal">บาท</span></p>
             </div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400">
-              <Building2 className="w-6 h-6" />
+        </div>
+
+        {/* Size Breakdown Summary Cards (Men vs Women) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          {/* Men Size Breakdown */}
+          <div className="bg-slate-900 border border-sky-500/20 rounded-3xl p-5 shadow-xl space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span className="text-sm font-bold text-sky-400 flex items-center gap-2">
+                <Shirt className="w-4 h-4" /> สรุปเสื้อทรงชาย (รวม {totalMenQty} ตัว)
+              </span>
             </div>
-            <div>
-              <p className="text-xs text-slate-400 font-medium">ยอดสั่งไซส์พิเศษ</p>
-              <p className="text-2xl font-black text-pink-400">{specialSizesCount} <span className="text-xs text-slate-400 font-normal">รายการ</span></p>
+
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+              {MEN_SIZE_LIST.map((sz) => (
+                <div 
+                  key={sz} 
+                  className={`rounded-2xl p-2.5 text-center border transition ${
+                    (menSizesQty[sz] || 0) > 0 
+                      ? 'bg-sky-500/10 border-sky-500/40 text-sky-300' 
+                      : 'bg-slate-950/60 border-slate-800 text-slate-500'
+                  }`}
+                >
+                  <p className="text-[11px] font-medium text-slate-400">{sz}</p>
+                  <p className="text-lg font-black">{menSizesQty[sz] || 0}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Women Size Breakdown */}
+          <div className="bg-slate-900 border border-pink-500/20 rounded-3xl p-5 shadow-xl space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span className="text-sm font-bold text-pink-400 flex items-center gap-2">
+                <Shirt className="w-4 h-4" /> สรุปเสื้อทรงหญิง (รวม {totalWomenQty} ตัว)
+              </span>
+            </div>
+
+            <div className="grid grid-cols-5 sm:grid-cols-5 gap-2">
+              {WOMEN_SIZE_LIST.map((sz) => (
+                <div 
+                  key={sz} 
+                  className={`rounded-2xl p-2.5 text-center border transition ${
+                    (womenSizesQty[sz] || 0) > 0 
+                      ? 'bg-pink-500/10 border-pink-500/40 text-pink-300' 
+                      : 'bg-slate-950/60 border-slate-800 text-slate-500'
+                  }`}
+                >
+                  <p className="text-[11px] font-medium text-slate-400">{sz}</p>
+                  <p className="text-lg font-black">{womenSizesQty[sz] || 0}</p>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -197,7 +265,7 @@ export default function Round2Dashboard() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="ค้นหาตาม ชื่อ, CID หรือหน่วยงาน..."
+              placeholder="ค้นหาตาม ชื่อ หรือหน่วยงาน..."
               className="w-full bg-slate-950 border border-slate-800 focus:border-amber-400 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none font-sans"
             />
           </div>
