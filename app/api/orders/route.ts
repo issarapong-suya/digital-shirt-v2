@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-// Option to bypass SlipOK check during testing
-const BYPASS_SLIP_CHECK = true;
+// Option to bypass SlipOK check during testing (Set to false for production real slip checking)
+const BYPASS_SLIP_CHECK = false;
 
 export async function POST(request: NextRequest) {
   try {
