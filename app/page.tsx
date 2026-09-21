@@ -107,7 +107,7 @@ export default function Round2OrderForm() {
   // Generate Dynamic PromptPay QR Code Payload
   useEffect(() => {
     const totalAmount = calculateTotal();
-    const promptPayAccount = '0981469553';
+    const promptPayAccount = '0817405685';
     try {
       const payload = totalAmount > 0 
         ? generatePayload(promptPayAccount, { amount: totalAmount }) 
@@ -571,8 +571,8 @@ export default function Round2OrderForm() {
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold mb-1">
                 <QrIcon className="w-3.5 h-3.5" /> PromptPay / พร้อมเพย์
               </span>
-              <p className="text-xs text-slate-400">ชื่อบัญชี: <strong className="text-slate-100 text-sm">น.ส.เอธยา ติ๊บประสอน</strong></p>
-              <p className="text-xs text-slate-400">เบอร์พร้อมเพย์: <span className="font-mono text-white font-bold text-base">098-146-9553</span></p>
+              <p className="text-xs text-slate-400">ชื่อบัญชี: <strong className="text-slate-100 text-sm">นายอนุรักษ์ วงษ์นิ่ม</strong></p>
+              <p className="text-xs text-slate-400">เบอร์พร้อมเพย์: <span className="font-mono text-white font-bold text-base">081-740-5685</span></p>
               <div className="border-t border-slate-800 pt-2 mt-2">
                 <p className="text-xs text-amber-300 font-medium">ยอดเงินระบุใน QR Code อัตโนมัติ</p>
                 <p className="text-2xl font-black text-amber-400">
@@ -605,7 +605,7 @@ export default function Round2OrderForm() {
               {qrDataUrl && (
                 <a
                   href={qrDataUrl}
-                  download={`PromptPay_0981469553_${currentTotal}THB.png`}
+                  download={`PromptPay_0817405685_${currentTotal}THB.png`}
                   className="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-amber-500/20"
                 >
                   <Download className="w-4 h-4" /> บันทึกรูป QR Code ลงเครื่อง ({currentTotal} บาท)
