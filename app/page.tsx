@@ -20,8 +20,13 @@ import {
   X,
   BarChart3,
   Download,
+  Lock,
   QrCode as QrIcon
 } from 'lucide-react';
+
+// ตั้งค่าเปิด-ปิดระบบรับสั่งจอง (true = ปิดรับฟอร์ม, false = เปิดรับปกติ)
+// สามารถเปลี่ยนค่าตรงนี้เป็น true หรือตั้งค่า Environment Variable: NEXT_PUBLIC_IS_CLOSED=true บน Vercel ได้
+const IS_CLOSED = process.env.NEXT_PUBLIC_IS_CLOSED === 'true' || false;
 
 const AGENCIES = [
   "สสจ.ลำปาง",
@@ -259,6 +264,32 @@ export default function Round2OrderForm() {
 
   const availableSizes = cut === 'ชาย' ? MEN_SIZES : WOMEN_SIZES;
   const currentTotal = calculateTotal();
+
+  if (IS_CLOSED) {
+    return (
+      <main className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 font-sans">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center shadow-2xl space-y-6">
+          <div className="w-20 h-20 bg-rose-500/10 border border-rose-500/30 rounded-full flex items-center justify-center mx-auto text-rose-500">
+            <Lock className="w-10 h-10" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-slate-100">ปิดรับการสั่งจองแล้ว</h1>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              ขออภัย ขณะนี้หมดเขตเวลาการสั่งจองเสื้อชมรมสุขภาพดิจิทัล สสจ.ลำปาง (รอบที่ 2) เรียบร้อยแล้วครับ
+            </p>
+          </div>
+          <div className="pt-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-sm border border-slate-700 transition"
+            >
+              <BarChart3 className="w-4 h-4" /> ดูรายงานสรุปยอดการสั่งจอง (Dashboard)
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-3 sm:p-6 font-sans">

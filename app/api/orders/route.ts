@@ -6,6 +6,10 @@ const BYPASS_SLIP_CHECK = false;
 
 export async function POST(request: NextRequest) {
   try {
+    if (process.env.NEXT_PUBLIC_IS_CLOSED === 'true') {
+      return NextResponse.json({ success: false, message: 'ขออภัย ระบบปิดรับการสั่งจองแล้ว' }, { status: 403 });
+    }
+
     const formData = await request.formData();
 
     const cid = (formData.get('cid') as string || '').trim();
